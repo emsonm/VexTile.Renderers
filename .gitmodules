@@ -1,0 +1,3 @@
+[submodule "submodules/NetTopologySuite.IO.VectorTiles"]
+	path = submodules/NetTopologySuite.IO.VectorTiles
+	url = git@github.com:emsonm/NetTopologySuite.IO.VectorTiles.git
