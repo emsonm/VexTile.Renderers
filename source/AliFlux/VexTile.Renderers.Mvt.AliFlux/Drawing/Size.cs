@@ -96,9 +96,9 @@ public struct Size
 
     public override bool Equals(object obj)
     {
-        if (ReferenceEquals(null, obj))
+        if (obj is null)
             return false;
-        return obj is Size && Equals((Size)obj);
+        return obj is Size size && Equals(size);
     }
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Minor Bug", "S2328:\"GetHashCode\" should not reference mutable fields", Justification = "Third party code")]

@@ -12,17 +12,20 @@ public class TypeInFilter : Filter
         Types = new List<string>();
 
         foreach (var type in types)
-            Types.Add(type.ToString());
+        {
+	        Types.Add(type.ToString());
+        }
     }
 
     public override bool Evaluate(IFeature feature)
     {
-        if (feature == null)
-            return false;
-
         foreach (var type in Types)
-            if (feature.Geometry.GeometryType.Equals(type))
-                return true;
+        {
+	        if (feature.Geometry.GeometryType.Equals(type, StringComparison.Ordinal))
+	        {
+		        return true;
+	        }
+        }
 
         return false;
     }

@@ -103,11 +103,12 @@ public static class DefaultByteDataSource
         return result;
     }
 
-    private async static Task<byte[]> LoadFromUrlAsync(Uri imageSource)
+    private static async Task<byte[]> LoadFromUrlAsync(Uri imageSource)
     {
         try
         {
-            using HttpClientHandler handler = new HttpClientHandler { AllowAutoRedirect = true };
+            using HttpClientHandler handler = new HttpClientHandler();
+            handler.AllowAutoRedirect = true;
             using var httpClient = new HttpClient(handler);
             using HttpResponseMessage response = await httpClient.GetAsync(imageSource, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
             response.EnsureSuccessStatusCode(); // Throws an exception if the HTTP response status is unsuccessful

@@ -21,19 +21,23 @@
         <Using Include="Xunit" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\VexTile.Renderers.Mvt.AliFlux\VexTile.Renderer.Mvt.AliFlux.csproj" />
-    </ItemGroup>
+
 
     <ItemGroup>
-        <Content Include="..\..\..\tiles\newyork-mapbox.pbf">
-            <Link>newyork-mapbox.pbf</Link>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Content Include="..\..\tiles\newyork-mapbox.pbf">
+          <Link>files\newyork-mapbox.pbf</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Content Include="..\..\..\tiles\zurich.mbtiles">
-            <Link>zurich.mbtiles</Link>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <Content Include="..\..\tiles\zurich.mbtiles">
+          <Link>files\zurich.mbtiles</Link>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+    </ItemGroup>
+
+
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\source\AliFlux\VexTile.Renderers.Mvt.AliFlux\VexTile.Renderer.Mvt.AliFlux.csproj" />
     </ItemGroup>
 
     <PropertyGroup>

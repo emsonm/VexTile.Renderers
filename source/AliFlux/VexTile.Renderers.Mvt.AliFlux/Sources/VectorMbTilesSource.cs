@@ -221,16 +221,16 @@ public class VectorTilesSource : IVectorTileSource
     {
         return await Task.Run(() =>
         {
-            var key = x.ToString() + "," + y.ToString() + "," + zoom.ToString();
+            var key = $"{x},{y},{zoom}";
 
             lock (keyLocker)
             {
-                if (tileCache.ContainsKey(key))
+                if (tileCache.TryGetValue(key, out VectorTile? expression))
                 {
-                    return tileCache[key];
+                    return expression;
                 }
 
-                if (GetRawTile(x, y, zoom) is byte[] rawTileStream)
+                if (GetRawTile(x, y, zoom) is { } rawTileStream)
                 {
 
                     var pbfTileProvider = new PbfTileSource(rawTileStream);
@@ -240,7 +240,7 @@ public class VectorTilesSource : IVectorTileSource
                     return tile;
                 }
 
-                return default;
+                return null;
             }
         });
     }
@@ -248,12 +248,12 @@ public class VectorTilesSource : IVectorTileSource
     public async Task<byte[]> GetTileAsync(int x, int y, int zoom) =>
         await Task.Run(() =>
         {
-            if (GetRawTile(x, y, zoom) is byte[] rawTile)
+            if (GetRawTile(x, y, zoom) is { } rawTile)
             {
                 return rawTile;
             }
 
-            return new byte[0];
+            return [];
         });
 
 }

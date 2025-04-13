@@ -38,11 +38,15 @@ public class FilterConverter : JsonConverter
 
     public static bool IsExpressionFilter(JArray filter)
     {
-        if (filter == null || filter.Count == 0)
-            return false;
+        if (filter is null or { Count: 0 })
+        {
+	        return false;
+        }
 
         if (filter[0].Type != JTokenType.String)
-            return false;
+        {
+	        return false;
+        }
 
         var op = filter[0].ToString();
 
@@ -50,7 +54,10 @@ public class FilterConverter : JsonConverter
         {
             case "has":
                 if (filter.Count < 2)
-                    return false;
+                {
+	                return false;
+                }
+
                 var operand = filter[1].ToString();
                 return operand != "$id" && operand != "$type";
             case "in":
@@ -70,7 +77,9 @@ public class FilterConverter : JsonConverter
                 for (int i = 1; i < filter.Count; i++)
                 {
                     if (!IsExpressionFilter(filter[i] as JArray) && filter.Type != JTokenType.Boolean)
-                        return false;
+                    {
+	                    return false;
+                    }
                 }
 
                 return true;
@@ -81,7 +90,9 @@ public class FilterConverter : JsonConverter
     public static object? CheckValue(JValue? value)
     {
         if (value == null || (value != null && value.Type != JTokenType.Boolean && value.Type != JTokenType.Float && value.Type != JTokenType.Integer && value.Type != JTokenType.String))
-            throw new ArgumentException("Filter expression value must be a bool, float or string");
+        {
+	        throw new ArgumentException("Filter expression value must be a bool, float or string");
+        }
 
         return value?.Value;
     }
@@ -89,9 +100,11 @@ public class FilterConverter : JsonConverter
     public static GeometryType ToGeometryType(JValue value)
     {
         if (value.Type != JTokenType.String)
-            throw new ArgumentException("Value for $type filter must be a string");
+        {
+	        throw new ArgumentException("Value for $type filter must be a string");
+        }
 
-        var type = value.ToString().ToLower();
+        var type = value.ToString().ToLowerInvariant();
 
         switch (type)
         {
@@ -114,85 +127,116 @@ public class FilterConverter : JsonConverter
     private static IFilter ConvertUnaryFilter(JArray filter, bool invert = false)
     {
         if (filter.Count < 2)
-            throw new ArgumentException("Filter expression must have 2 elements");
+        {
+	        throw new ArgumentException("Filter expression must have 2 elements");
+        }
 
         if (filter[1].Type != JTokenType.String)
-            throw new ArgumentException("Filter expression key must be a string");
+        {
+	        throw new ArgumentException("Filter expression key must be a string");
+        }
 
         var key = filter[1].ToString();
 
-        if (key.Equals("$id"))
+        if (key.Equals("$id", StringComparison.Ordinal))
         {
             if (invert)
-                return new NotHasIdentifierFilter();
+            {
+	            return new NotHasIdentifierFilter();
+            }
             else
-                return new HasIdentifierFilter();
+            {
+	            return new HasIdentifierFilter();
+            }
         }
         else
         {
             if (invert)
-                return new NotHasFilter(key);
+            {
+	            return new NotHasFilter(key);
+            }
             else
-                return new HasFilter(key);
+            {
+	            return new HasFilter(key);
+            }
         }
     }
 
     private static IFilter? ConvertEqualityFilter(JArray filter, bool invert = false)
     {
         if (filter.Count < 3)
-            throw new ArgumentException("Filter expression must have 3 elements");
+        {
+	        throw new ArgumentException("Filter expression must have 3 elements");
+        }
 
         if (filter[1].Type != JTokenType.String)
-            throw new ArgumentException("Filter expression key must be a string");
+        {
+	        throw new ArgumentException("Filter expression key must be a string");
+        }
 
         var key = filter[1].ToString();
 
-        if (key.Equals("$type"))
+        if (key.Equals("$type", StringComparison.Ordinal))
         {
             var filterValue = ToGeometryType((JValue)filter[2]);
 
             if (invert)
-                return new TypeNotEqualsFilter(filterValue);
-            else
-                return new TypeEqualsFilter(filterValue);
+            {
+	            return new TypeNotEqualsFilter(filterValue);
+            }
+
+            return new TypeEqualsFilter(filterValue);
         }
-        else if (key.Equals("$id"))
+
+        if (key.Equals("$id", StringComparison.Ordinal))
         {
-            var filterValue = ToFeatureIdentifier(filter[2] as JValue);
+	        if (filter[2] is JValue jValue && ToFeatureIdentifier(jValue) is { } filterValue)
+	        {
+		        if (invert)
+		        {
+			        return new IdentifierNotEqualsFilter(filterValue.ToString() ?? string.Empty);
+		        }
 
-            if (filterValue == null)
-                return null;
+		        return new IdentifierEqualsFilter(filterValue.ToString() ?? string.Empty);
+	        }
 
-            if (invert)
-                return new IdentifierNotEqualsFilter(filterValue.ToString() ?? string.Empty);
-            else
-                return new IdentifierEqualsFilter(filterValue.ToString() ?? string.Empty);
+	        return null;
         }
         else
         {
-            if (!(filter[2] is JValue filterValue))
-                return null;
+	        if ((filter[2] is JValue {Value: { } filterValue}))
+	        {
+		        if (invert)
+		        {
+			        return new NotEqualsFilter(key, filterValue);
+		        }
 
-            if (invert)
-                return new NotEqualsFilter(key, filterValue.Value);
-            else
-                return new EqualsFilter(key, filterValue.Value);
+		        return new EqualsFilter(key, filterValue);
+	        }
+
+	        return null;
         }
     }
 
     private static IFilter ConvertBinaryFilter<T>(JArray filter) where T : BinaryFilter
     {
         if (filter.Count < 3)
-            throw new ArgumentException("Filter expression must have 3 elements");
+        {
+	        throw new ArgumentException("Filter expression must have 3 elements");
+        }
 
         if (filter[1].Type != JTokenType.String)
-            throw new ArgumentException("Filter expression key must be a string");
+        {
+	        throw new ArgumentException("Filter expression key must be a string");
+        }
 
         var key = filter[1].ToString();
         var filterValue = CheckValue(filter[2] as JValue);
 
         if (filterValue == null)
-            return null;
+        {
+	        return null;
+        }
 
         return (BinaryFilter)Activator.CreateInstance(typeof(T), key, filterValue);
     }
@@ -200,41 +244,60 @@ public class FilterConverter : JsonConverter
     private static IFilter ConvertSetFilter(JArray filter, bool invert = false)
     {
         if (filter.Count < 2)
-            throw new ArgumentException("Filter expression must have 2 elements");
+        {
+	        throw new ArgumentException("Filter expression must have 2 elements");
+        }
 
         if (filter[1].Type != JTokenType.String)
-            throw new ArgumentException("Filter expression key must be a string");
+        {
+	        throw new ArgumentException("Filter expression key must be a string");
+        }
 
         var key = filter[1].ToString();
 
-        if (key.Equals("$type"))
+        if (key.Equals("$type", StringComparison.Ordinal))
         {
             var filterList = new List<GeometryType>();
 
             for (int i = 2; i < filter.Count; i++)
-                filterList.Add(ToGeometryType((JValue)filter[i]));
+            {
+	            filterList.Add(ToGeometryType((JValue)filter[i]));
+            }
 
             if (invert)
-                return new TypeNotInFilter(filterList);
+            {
+	            return new TypeNotInFilter(filterList);
+            }
             else
-                return new TypeInFilter(filterList);
+            {
+	            return new TypeInFilter(filterList);
+            }
         }
-        else if (key.Equals("$id"))
+        else if (key.Equals("$id", StringComparison.Ordinal))
         {
             var filterList = new List<string>();
 
             for (int i = 2; i < filter.Count; i++)
             {
-                var filterValue = ToFeatureIdentifier(filter[i] as JValue).ToString();
+	            if (filter[i] is JValue jValue)
+	            {
+		            var filterValue = ToFeatureIdentifier(jValue).ToString();
 
-                if (!string.IsNullOrEmpty(filterValue))
-                    filterList.Add(filterValue);
+		            if (!string.IsNullOrEmpty(filterValue))
+		            {
+			            filterList.Add(filterValue);
+		            }
+	            }
             }
 
             if (invert)
-                return new IdentifierNotInFilter(filterList);
+            {
+	            return new IdentifierNotInFilter(filterList);
+            }
             else
-                return new IdentifierInFilter(filterList);
+            {
+	            return new IdentifierInFilter(filterList);
+            }
         }
         else
         {
@@ -242,14 +305,20 @@ public class FilterConverter : JsonConverter
 
             for (int i = 2; i < filter.Count; i++)
             {
-                if (filter[i] is JValue value && value != null && value.Value != null)
-                    filterList.Add(value.Value);
+                if (filter[i] is JValue {Value: not null} value)
+                {
+	                filterList.Add(value.Value);
+                }
             }
 
             if (invert)
-                return new NotInFilter(key, filterList);
+            {
+	            return new NotInFilter(key, filterList);
+            }
             else
-                return new InFilter(key, filterList);
+            {
+	            return new InFilter(key, filterList);
+            }
         }
     }
 
@@ -260,14 +329,19 @@ public class FilterConverter : JsonConverter
         for (int i = 1; i < filter.Count; i++)
         {
             if (filter[i].Type != JTokenType.Array)
-                throw new ArgumentException("Compound filters must be arrays");
+            {
+	            throw new ArgumentException("Compound filters must be arrays");
+            }
 
             var element = ConvertFilter((JArray)filter[i]);
 
             if (element != null)
-                filters.Add(element);
+            {
+	            filters.Add(element);
+            }
         }
 
+        // TODO - this can be null and so the result should be nullable
         return (CompoundFilter)Activator.CreateInstance(typeof(T), filters);
     }
 
@@ -294,16 +368,24 @@ public class FilterConverter : JsonConverter
     public static IFilter ConvertFilter(JArray filter)
     {
         if (IsExpressionFilter(filter))
-            return ConvertExpressionFilter(filter);
+        {
+	        return ConvertExpressionFilter(filter);
+        }
 
         if (filter == null)
-            throw new ArgumentException("Filter expression must be an array");
+        {
+	        throw new ArgumentException("Filter expression must be an array");
+        }
 
         if (filter.Count < 1)
-            throw new ArgumentException("Filter expression must have at least 1 element");
+        {
+	        throw new ArgumentException("Filter expression must have at least 1 element");
+        }
 
         if (filter[0].Type != JTokenType.String)
-            throw new ArgumentException("Filter operator must be a string");
+        {
+	        throw new ArgumentException("Filter operator must be a string");
+        }
 
         var op = filter[0].ToString();
 

@@ -29,9 +29,9 @@ public class MbTilesSource : IVectorTileSource
     // converted to use Sqlite-Net
     public MbTilesSource(string path)
     {
-        this.Path = path;
+        Path = path;
 
-        var connectionstring = new SQLiteConnectionString(this.Path, SQLiteOpenFlags.ReadOnly, false);
+        var connectionstring = new SQLiteConnectionString(Path, SQLiteOpenFlags.ReadOnly, false);
         sharedConnection = new SQLiteConnection(connectionstring);
 
         LoadMetadata();
@@ -50,7 +50,7 @@ public class MbTilesSource : IVectorTileSource
                     case "bounds":
                         string val = item.Value;
                         string[] vals = val.Split(',');
-                        this.Bounds = new GeoExtent
+                        Bounds = new GeoExtent
                         {
                             West = Convert.ToDouble(vals[0]),
                             South = Convert.ToDouble(vals[1]),
@@ -61,26 +61,26 @@ public class MbTilesSource : IVectorTileSource
                     case "center":
                         val = item.Value;
                         vals = val.Split(',');
-                        this.Center = new CoordinatePair
+                        Center = new CoordinatePair
                         {
                             X = Convert.ToDouble(vals[0]),
                             Y = Convert.ToDouble(vals[1])
                         };
                         break;
                     case "minzoom":
-                        this.MinZoom = Convert.ToInt32(item.Value);
+                        MinZoom = Convert.ToInt32(item.Value);
                         break;
                     case "maxzoom":
-                        this.MaxZoom = Convert.ToInt32(item.Value);
+                        MaxZoom = Convert.ToInt32(item.Value);
                         break;
                     case "name":
-                        this.Name = item.Value;
+                        Name = item.Value;
                         break;
                     case "description":
-                        this.Description = item.Value;
+                        Description = item.Value;
                         break;
                     case "version":
-                        this.MBTilesVersion = item.Value;
+                        MBTilesVersion = item.Value;
                         break;
 
                 }

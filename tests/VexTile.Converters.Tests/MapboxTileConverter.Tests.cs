@@ -6,12 +6,12 @@ namespace VexTile.Readers.Tests;
 
 public class MapboxConverterTests
 {
-    readonly string _path = "files\\zurich.mbtiles";
+    readonly string path = @"files\zurich.mbtiles";
 
     [Fact]
     public async Task VectorTileConverterTest()
     {
-        var dataSource = new MbTilesTileDataSource(_path, determineZoomLevelsFromTilesTable: true, determineTileRangeFromTilesTable: true);
+        var dataSource = new MbTilesTileDataSource(path, determineZoomLevelsFromTilesTable: true, determineTileRangeFromTilesTable: true);
 
         Assert.True(dataSource.Version == "3.6.1");
 

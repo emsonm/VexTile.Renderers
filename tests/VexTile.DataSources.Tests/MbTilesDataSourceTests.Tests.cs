@@ -2,16 +2,16 @@
 using VexTile.TileDataSource.MbTilesTileDataSource;
 using Xunit;
 
-namespace VexTile.DataSource.Tests;
+namespace VexTile.DataSources.Tests;
 
-public class MBTilesDataSourceTests
+public class MbTilesDataSourceTests
 {
-    readonly string _path = "files\\zurich.mbtiles";
+    readonly string path = "files\\zurich.mbtiles";
 
     [Fact]
     public void CheckMetaDataTest()
     {
-        var dataSource = new MbTilesTileDataSource(_path, determineZoomLevelsFromTilesTable: true, determineTileRangeFromTilesTable: true);
+        var dataSource = new MbTilesTileDataSource(path, determineZoomLevelsFromTilesTable: true, determineTileRangeFromTilesTable: true);
 
         Assert.True(dataSource.Name == "OpenMapTiles");
         Assert.True(dataSource.Description == "Extract from https://openmaptiles.org");
@@ -24,7 +24,7 @@ public class MBTilesDataSourceTests
     [Fact]
     public async Task CheckTileDataTest()
     {
-        var dataSource = new MbTilesTileDataSource(_path, determineZoomLevelsFromTilesTable: true, determineTileRangeFromTilesTable: true);
+        var dataSource = new MbTilesTileDataSource(path, determineZoomLevelsFromTilesTable: true, determineTileRangeFromTilesTable: true);
 
         var tileData = await dataSource.GetTileAsync(new Tile(8580, 5738, 14));
 

@@ -3,17 +3,9 @@ using VexTile.Common.Enums;
 
 namespace VexTile.Style.Mapbox.Filter;
 
-public class TypeEqualsFilter : Filter
+public class TypeEqualsFilter(GeometryType type) : Filter
 {
-    public string Type { get; }
+    public string Type { get; } = type.ToString();
 
-    public TypeEqualsFilter(GeometryType type)
-    {
-        Type = type.ToString();
-    }
-
-    public override bool Evaluate(IFeature feature)
-    {
-        return feature != null && feature.Geometry.GeometryType.Equals(Type);
-    }
+    public override bool Evaluate(IFeature feature) => feature.Geometry.GeometryType.Equals(Type, StringComparison.Ordinal);
 }

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -285,6 +286,7 @@ public class SkiaCanvas : ICanvas
         return false;
     }
 
+    [SuppressMessage("ReSharper", "UnusedParameter.Local")]
     private SKTypeface GetFont(string[] familyNames, Brush style)
     {
         lock (s_fontLock)

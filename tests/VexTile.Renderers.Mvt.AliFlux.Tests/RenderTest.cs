@@ -11,13 +11,14 @@ public class RenderTest
     // PNG header = 137 80 78 71 13 10 26 10
     private static bool IsPng(byte[] bytes) => bytes is [137, 80, 78, 71, 13, 10, 26, 10, ..];
 
+    readonly string path = @"files\zurich.mbtiles";
+    readonly string pbfPath = @"files\newyork-mapbox.pbf";
+
     [Fact]
     public async Task BasicFactoryRenderTest()
     {
         var canvas = new SkiaCanvas();
         var style = new VectorStyle(VectorStyleKind.Default);
-
-        string path = "zurich.mbtiles";
 
         var val = new SQLiteConnectionString(path, (SQLiteOpenFlags)1, false);
         var provider = new VectorTilesSource(new SQLiteConnection(val));
@@ -45,9 +46,7 @@ public class RenderTest
         var canvas = new SkiaCanvas();
         var style = new VectorStyle(VectorStyleKind.Default);
 
-        string path = "newyork-mapbox.pbf";
-
-        var bytes = await File.ReadAllBytesAsync(path);
+        var bytes = await File.ReadAllBytesAsync(pbfPath);
 
         var provider = new PbfTileSource(bytes);
         style.SetSourceProvider("openmaptiles", provider);
